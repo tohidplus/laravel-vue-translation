@@ -53,9 +53,11 @@ class LaravelVueTranslation
     private function setTranslations()
     {
         foreach ($this->files as $file) {
+            $path = $file->getRelativePathName();
+            $delimiter = strpos($path, '/') !== false ? '/' : '\\';
             $array = array_map(function ($key) use ($file) {
                 return str_replace('.' . $file->getExtension(), '', $key);
-            }, explode('/', $file->getRelativePathName()));
+            }, explode($delimiter, $path));
             $nestedArray = $this->addArrayLevels($array, [], require $file->getPathName());
             $this->translations = array_merge_recursive($this->translations, $nestedArray);
         }
