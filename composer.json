@@ -10,7 +10,9 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "elementaryframework/fire-fs": "^1.0"
+    },
     "autoload": {
         "psr-4": {
             "Tohidplus\\Translation\\": "src/"

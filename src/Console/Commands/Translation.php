@@ -2,8 +2,11 @@
 
 namespace Tohidplus\Translation\Console\Commands;
 
+use ElementaryFramework\FireFS\Watcher\FileSystemWatcher;
 use Illuminate\Console\Command;
+use function MongoDB\BSON\toJSON;
 use Tohidplus\Translation\Facades\VueTranslation;
+use Tohidplus\Translation\FileWatcher\Listener;
 
 class Translation extends Command
 {
@@ -12,7 +15,7 @@ class Translation extends Command
      *
      * @var string
      */
-    protected $signature = 'VueTranslation:generate';
+    protected $signature = 'VueTranslation:generate {--watch=0}';
 
     /**
      * The console command description.
@@ -38,7 +41,26 @@ class Translation extends Command
      */
     public function handle()
     {
+        $this->generate();
+        if ($this->option('watch')) {
+            $this->watch();
+        }
+    }
+
+    public function generate()
+    {
         VueTranslation::compile();
-        $this->info('The translations.json file updated successfully.');
+    }
+
+    public function watch()
+    {
+        /** @var FileSystemWatcher $watcher */
+        $watcher = app('watcher');
+        $watcher->setListener(new Listener())
+            ->setRecursive(true)
+            ->setPath('./resources/lang')
+            ->setWatchInterval(250)
+            ->build();
+        $watcher->start();
     }
 }
