@@ -25,7 +25,7 @@ This package helps you to have Laravel translation functionality in your client 
  
  Run the artisan command
  ```bash
- php artisan VueTranslation:generate
+ php artisan VueTranslation:generate --watch=1
  ```
   > This will compile down all the translation files in the **resources/lang** directory in the file **resources/js/VueTranslation/translations.json** 
  
