@@ -108,6 +108,12 @@ Example in Vue component
     }
 </script>
 ```
+### Uses Fallback Locale
+> To interact same like **Laravel**   trans() insert in your layout 
+```html
+<meta name="fallback_locale" content="{{ config('app.fallback_locale') }}">
+```
+
 ### Replace attributes
 > It's not recommended to use this package for showing validation errors but if you want you can replace :attribute, :size
 etc by passing the second argument as an object.
