@@ -53,10 +53,17 @@ class LaravelVueTranslation
             $path = $file->getRelativePathName();
             $this->printFileCompiled($path);
             $delimiter = strpos($path, '/') !== false ? '/' : '\\';
+            
             $array = array_map(function ($key) use ($file) {
                 return str_replace('.' . $file->getExtension(), '', $key);
             }, explode($delimiter, $path));
-            $nestedArray = $this->addArrayLevels($array, [], require $file->getPathName());
+
+            $nestedArray = $this->addArrayLevels($array, [], 
+                $file->getExtension() === 'json'  
+                    ? json_decode(file_get_contents($file->getPathName()), true)
+                    : require $file->getPathName()
+            );
+            
             $this->translations = array_merge_recursive($this->translations, $nestedArray);
         }
     }
