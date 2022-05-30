@@ -1,19 +1,38 @@
-const translations = require('./translations');
+const translations = require("./translations");
 export default {
-    translate(key,replacements={}) {
+    translate(key, replacements = {}, allowKeyDotSplitting = true) {
         let lang = document.documentElement.lang;
         let word = translations[lang];
-        let fallback_locale = document.querySelector('meta[name="fallback_locale"]') || null;
+        let fallback_locale =
+            document.querySelector('meta[name="fallback_locale"]') || null;
 
-        const getAltValue = (object, keys) => keys.split('.').reduce((o, k) => (o || {})[k], object);
+        const getAltValue = function(object, keys) {
+            if (allowKeyDotSplitting === true) {
+                // Avoid spliting on .dot for normal sentence case
+                keys = keys.split(".");
+            }
 
-        const keys = key.split('.');
+            return keys.reduce((o, k) => (o || {})[k], object);
+        };
+
+        let keys;
+        if (allowKeyDotSplitting === true) {
+            keys = key.split(".");
+        } else {
+            // Avoid spliting on .dot for normal sentence case
+            keys = [key];
+        }
+
         for (let i in keys) {
             try {
                 word = word[keys[i]];
                 if (word === undefined) {
-                    if (fallback_locale.content){
-                        word = getAltValue(translations[fallback_locale.content], key) || key;
+                    if (fallback_locale.content) {
+                        word =
+                            getAltValue(
+                                translations[fallback_locale.content],
+                                key
+                            ) || key;
                     } else {
                         word = key;
                     }
@@ -24,9 +43,10 @@ export default {
                 break;
             }
         }
-         for (let i in replacements){
-             word=word.replace(`:${i}`,replacements[i]);
-         }
-         return word;
+
+        for (let i in replacements) {
+            word = word.replace(`:${i}`, replacements[i]);
+        }
+        return word;
     }
-}
+};
