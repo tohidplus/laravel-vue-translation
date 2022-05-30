@@ -84,6 +84,10 @@ return [
 You can get the value by calling the **translate** method
 ```js
 translate('messages.foo.bar')
+
+// or apply the sentence based translation withint splitting on dots(.)
+
+translate('Some full translation. Like this one.', {}, false)
 ```
 Example in Vue component
 ```vue
