@@ -58,7 +58,7 @@ class Translation extends Command
         $watcher = app('watcher');
         $watcher->setListener(new Listener())
             ->setRecursive(true)
-            ->setPath('./resources/lang')
+            ->setPath('./lang')
             ->setWatchInterval(250)
             ->build();
         $watcher->start();
