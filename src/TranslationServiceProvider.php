@@ -13,11 +13,11 @@ class TranslationServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                Translation::class
+                Translation::class,
             ]);
         }
         $this->publishes([
-            __DIR__ . '/resources/js/VueTranslation' => resource_path('js/VueTranslation')
+            __DIR__.'/resources/js/VueTranslation' => resource_path('js/VueTranslation'),
         ]);
     }
 
@@ -29,8 +29,8 @@ class TranslationServiceProvider extends ServiceProvider
         $this->app->bind('watcher', function () {
             $fireFS = new FireFS();
             $watcher = new FileSystemWatcher($fireFS);
+
             return $watcher;
         });
     }
-
 }

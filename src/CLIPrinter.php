@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Tohidplus\Translation;
 
 class CLIPrinter
@@ -38,6 +37,6 @@ class CLIPrinter
 
     public static function clear()
     {
-        echo chr(27) . chr(91) . 'H' . chr(27) . chr(91) . 'J';
+        echo chr(27).chr(91).'H'.chr(27).chr(91).'J';
     }
 }

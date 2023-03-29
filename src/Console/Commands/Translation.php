@@ -4,7 +4,6 @@ namespace Tohidplus\Translation\Console\Commands;
 
 use ElementaryFramework\FireFS\Watcher\FileSystemWatcher;
 use Illuminate\Console\Command;
-use function MongoDB\BSON\toJSON;
 use Tohidplus\Translation\Facades\VueTranslation;
 use Tohidplus\Translation\FileWatcher\Listener;
 
