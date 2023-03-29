@@ -7,7 +7,6 @@ use Tohidplus\Translation\Contract\TranslationFileHelper;
 
 class LaravelTranslationFileHelper implements TranslationFileHelper
 {
-
     /**
      * @return \Symfony\Component\Finder\SplFileInfo[]
      */
