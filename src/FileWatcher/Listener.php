@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Tohidplus\Translation\FileWatcher;
 
 use ElementaryFramework\FireFS\Events\FileSystemEvent;
@@ -25,6 +24,7 @@ class Listener implements IFileSystemListener
             CLIPrinter::print("Error on [{$exception->getLine()}] - [{$exception->getFile()}]", CLIPrinter::FOREGROUND_WHITE, CLIPrinter::BACKGROUND_RED);
             CLIPrinter::print($exception->getMessage());
         }
+
         return false;
     }
 
@@ -51,7 +51,6 @@ class Listener implements IFileSystemListener
      */
     public function onModified(FileSystemEvent $event)
     {
-
     }
 
     /**

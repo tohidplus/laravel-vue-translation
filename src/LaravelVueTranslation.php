@@ -62,7 +62,7 @@ class LaravelVueTranslation
             $nestedArray = $this->addArrayLevels(
                 $array,
                 [],
-                $file->getExtension() === 'json'  
+                $file->getExtension() === 'json'
                     ? json_decode(file_get_contents($file->getPathName()), true)
                     : require $file->getPathName()
             );

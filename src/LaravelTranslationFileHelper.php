@@ -24,7 +24,7 @@ class LaravelTranslationFileHelper implements TranslationFileHelper
         if (!File::exists($this->destinationPath())) {
             File::makeDirectory($this->destinationPath(), 0755, true, true);
         }
-        File::put($this->destinationPath() . '/translations.json', json_encode($data));
+        File::put($this->destinationPath().'/translations.json', json_encode($data));
     }
 
     /**
