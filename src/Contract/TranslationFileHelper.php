@@ -2,13 +2,33 @@
 
 namespace Tohidplus\Translation\Contract;
 
+use Symfony\Component\Finder\SplFileInfo;
+
 interface TranslationFileHelper
 {
-    public function fetch();
+    /**
+     * Get the translation files (.php and .json) in the lang directory.
+     *
+     * @return SplFileInfo[]
+     *
+     * @throws \Tohidplus\Translation\Exceptions\TranslationException
+     */
+    public function fetch(): array;
 
-    public function write(array $data);
+    /**
+     * Write the compiled translations to the translations.json file.
+     *
+     * @param  array<array-key, mixed>  $data
+     */
+    public function write(array $data): void;
 
-    public function resourcePath();
+    /**
+     * Get the path of the lang directory to compile.
+     */
+    public function resourcePath(): string;
 
-    public function destinationPath();
+    /**
+     * Get the path of the directory that receives the translations.json file.
+     */
+    public function destinationPath(): string;
 }

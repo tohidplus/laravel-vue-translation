@@ -2,10 +2,10 @@
 
 namespace Tohidplus\Translation\Console\Commands;
 
-use ElementaryFramework\FireFS\Watcher\FileSystemWatcher;
 use Illuminate\Console\Command;
-use Tohidplus\Translation\Facades\VueTranslation;
-use Tohidplus\Translation\FileWatcher\Listener;
+use Throwable;
+use Tohidplus\Translation\LaravelVueTranslation;
+use Tohidplus\Translation\Watcher\TranslationWatcher;
 
 class Translation extends Command
 {
@@ -14,52 +14,85 @@ class Translation extends Command
      *
      * @var string
      */
-    protected $signature = 'VueTranslation:generate {--watch=0}';
+    protected $signature = 'VueTranslation:generate
+                            {--watch=0 : Watch the lang directory and compile again when a file changes}
+                            {--interval=250 : The time in milliseconds between two checks in watch mode}';
+
+    /**
+     * The console command name aliases.
+     *
+     * @var array<int, string>
+     */
+    protected $aliases = ['vue-translation:generate'];
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Compiles the translation files into a json file';
+    protected $description = 'Compile the Laravel translation files into a JSON file for JavaScript';
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function handle(LaravelVueTranslation $translation, TranslationWatcher $watcher): int
     {
-        parent::__construct();
-    }
+        $compiled = $this->generate($translation);
 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
-    {
-        $this->generate();
-        if ($this->option('watch')) {
-            $this->watch();
+        if (! $this->shouldWatch()) {
+            return $compiled ? self::SUCCESS : self::FAILURE;
         }
+
+        $this->components->info("Watching [{$translation->langPath()}] for changes. Press Ctrl+C to stop.");
+
+        $watcher->watch(
+            $translation->langPath(),
+            fn () => $this->generate($translation),
+            (int) $this->option('interval')
+        );
+
+        return self::SUCCESS;
     }
 
-    public function generate()
+    /**
+     * Compile the translations and report the result.
+     */
+    public function generate(LaravelVueTranslation $translation): bool
     {
-        VueTranslation::compile();
+        $count = 0;
+
+        try {
+            $translation->compile(function (string $path) use (&$count) {
+                $count++;
+
+                if ($this->output->isVerbose()) {
+                    $this->components->twoColumnDetail($path, '<fg=green;options=bold>DONE</>');
+                }
+            });
+        } catch (Throwable $exception) {
+            $this->components->error($exception->getMessage());
+
+            return false;
+        }
+
+        $this->components->info(sprintf(
+            'Compiled %d translation %s into [%s].',
+            $count,
+            $count === 1 ? 'file' : 'files',
+            $translation->outputFile()
+        ));
+
+        return true;
     }
 
-    public function watch()
+    /**
+     * Accept "--watch", "--watch=1" and "--watch=true". Ignore "--watch=0" and "--watch=false".
+     */
+    protected function shouldWatch(): bool
     {
-        /** @var FileSystemWatcher $watcher */
-        $watcher = app('watcher');
-        $watcher->setListener(new Listener())
-            ->setRecursive(true)
-            ->setPath(lang_path())
-            ->setWatchInterval(250)
-            ->build();
-        $watcher->start();
+        if (! $this->input->hasParameterOption('--watch', true)) {
+            return false;
+        }
+
+        $value = $this->option('watch');
+
+        return $value === null || ! in_array(strtolower((string) $value), ['0', 'false', 'no', 'off', ''], true);
     }
 }

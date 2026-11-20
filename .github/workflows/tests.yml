@@ -1,0 +1,93 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} (${{ matrix.stability }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5', '8.6']
+        laravel: ['12.*', '13.*']
+        stability: [prefer-stable]
+        exclude:
+          # Laravel 13 requires PHP 8.3 or newer.
+          - laravel: '13.*'
+            php: '8.2'
+        include:
+          - laravel: '12.*'
+            testbench: '10.*'
+          - laravel: '13.*'
+            testbench: '11.*'
+          # The lowest versions that composer.json allows.
+          - php: '8.2'
+            laravel: '12.*'
+            testbench: '10.*'
+            stability: prefer-lowest
+          - php: '8.3'
+            laravel: '13.*'
+            testbench: '11.*'
+            stability: prefer-lowest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, fileinfo, json
+          coverage: none
+
+      - name: Install the dependencies
+        run: |
+          composer require "illuminate/console:${{ matrix.laravel }}" "illuminate/filesystem:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" --no-interaction --no-update
+          composer require "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+
+      - name: Show the installed versions
+        run: composer show | grep -E '^(laravel/framework|orchestra/testbench|phpunit/phpunit) '
+
+      - name: Run the PHP tests
+        run: vendor/bin/phpunit
+
+  javascript:
+    name: JavaScript - Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24', '26']
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install the dependencies
+        run: npm ci
+
+      - name: Run the JavaScript tests
+        run: npm test

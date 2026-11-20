@@ -2,93 +2,124 @@
 
 namespace Tohidplus\Translation;
 
+use JsonException;
+use Symfony\Component\Finder\SplFileInfo;
 use Tohidplus\Translation\Contract\TranslationFileHelper;
+use Tohidplus\Translation\Exceptions\TranslationException;
 
 class LaravelVueTranslation
 {
-    /**
-     * @var array
-     */
-    private $translations = [];
-    /**
-     * @var TranslationFileHelper
-     */
-    private $translationFileHelper;
+    public function __construct(protected TranslationFileHelper $translationFileHelper)
+    {
+    }
 
     /**
-     * LaravelJSTranslation constructor.
+     * Compile the translation files and write them to the translations.json file.
      *
-     * @param TranslationFileHelper $translationFileHelper
+     * @param  (callable(string): void)|null  $onFileCompiled  Receives the relative path of each compiled file.
+     * @return array<array-key, mixed> The compiled translations.
+     *
+     * @throws TranslationException
      */
-    public function __construct(TranslationFileHelper $translationFileHelper)
+    public function compile(?callable $onFileCompiled = null): array
     {
-        $this->translationFileHelper = $translationFileHelper;
+        $translations = $this->translations($onFileCompiled);
+
+        $this->translationFileHelper->write($translations);
+
+        return $translations;
     }
 
-    public function compile()
+    /**
+     * Read the translation files into one array, keyed by locale.
+     *
+     * The file "en/messages.php" becomes "en.messages", "en/admin/users.php"
+     * becomes "en.admin.users", and the file "en.json" becomes "en".
+     *
+     * @param  (callable(string): void)|null  $onFileCompiled  Receives the relative path of each compiled file.
+     * @return array<array-key, mixed>
+     *
+     * @throws TranslationException
+     */
+    public function translations(?callable $onFileCompiled = null): array
     {
-        $this->printCompileStarted();
-        $this->setTranslations();
-        $this->translationFileHelper->write($this->translations);
-        $this->printCompileEnded();
-    }
+        $translations = [];
 
-    private function addArrayLevels(array $keys, array $target, $data)
-    {
-        if ($keys) {
-            $key = array_shift($keys);
-            if (!count($keys)) {
-                $target[$key] = $data;
-            } else {
-                $target[$key] = $this->addArrayLevels($keys, [], $data);
+        foreach ($this->translationFileHelper->fetch() as $file) {
+            $path = str_replace('\\', '/', $file->getRelativePathname());
+            $keys = explode('/', substr($path, 0, -strlen($file->getExtension()) - 1));
+
+            $translations = array_replace_recursive($translations, $this->nest($keys, $this->load($file)));
+
+            if ($onFileCompiled !== null) {
+                $onFileCompiled($path);
             }
         }
 
-        return $target;
-    }
-
-    private function setTranslations()
-    {
-        $this->translations = [];
-        foreach ($this->translationFileHelper->fetch() as $file) {
-            $path = $file->getRelativePathName();
-            $this->printFileCompiled($path);
-            $delimiter = strpos($path, '/') !== false ? '/' : '\\';
-
-            $array = array_map(function ($key) use ($file) {
-                return str_replace('.'.$file->getExtension(), '', $key);
-            }, explode($delimiter, $path));
-
-            $nestedArray = $this->addArrayLevels(
-                $array,
-                [],
-                $file->getExtension() === 'json'
-                    ? json_decode(file_get_contents($file->getPathName()), true)
-                    : require $file->getPathName()
-            );
-
-            $this->translations = array_merge_recursive($this->translations, $nestedArray);
-        }
-    }
-
-    protected function printCompileStarted(): void
-    {
-        CLIPrinter::clear();
-        CLIPrinter::print("\n\nCompiling...\n", CLIPrinter::FOREGROUND_BLUE, CLIPrinter::BACKGROUND_BLACK);
-        usleep(50000);
+        return $translations;
     }
 
     /**
-     * @param $path
+     * Get the full path of the translations.json file.
      */
-    private function printFileCompiled($path): void
+    public function outputFile(): string
     {
-        CLIPrinter::print($path, CLIPrinter::FOREGROUND_YELLOW, CLIPrinter::BACKGROUND_BLACK);
-        usleep(25000);
+        return rtrim($this->translationFileHelper->destinationPath(), '/\\')
+            .DIRECTORY_SEPARATOR.LaravelTranslationFileHelper::FILENAME;
     }
 
-    private function printCompileEnded()
+    /**
+     * Get the path of the lang directory.
+     */
+    public function langPath(): string
     {
-        CLIPrinter::print("\nThe translations.json file updated successfully.", CLIPrinter::FOREGROUND_GREEN);
+        return $this->translationFileHelper->resourcePath();
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     *
+     * @throws TranslationException
+     */
+    protected function load(SplFileInfo $file): array
+    {
+        $path = $file->getPathname();
+
+        if (strtolower($file->getExtension()) === 'json') {
+            try {
+                $lines = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException $exception) {
+                throw TranslationException::invalidJson($path, $exception);
+            }
+        } else {
+            // In watch mode the same file is loaded again. Make sure OPcache does not return an old version.
+            if (function_exists('opcache_invalidate')) {
+                @opcache_invalidate($path, true);
+            }
+
+            $lines = (static fn (string $__path) => require $__path)($path);
+        }
+
+        if (! is_array($lines)) {
+            throw TranslationException::notAnArray($path);
+        }
+
+        return $lines;
+    }
+
+    /**
+     * Put the value at the nested position given by the keys.
+     *
+     * @param  string[]  $keys
+     * @param  array<array-key, mixed>  $value
+     * @return array<array-key, mixed>
+     */
+    protected function nest(array $keys, array $value): array
+    {
+        foreach (array_reverse($keys) as $key) {
+            $value = [$key => $value];
+        }
+
+        return $value;
     }
 }
