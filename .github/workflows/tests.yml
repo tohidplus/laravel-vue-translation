@@ -22,29 +22,18 @@ jobs:
       fail-fast: false
       matrix:
         php: ['8.2', '8.3', '8.4', '8.5', '8.6']
-        laravel: ['11.*', '12.*', '13.*']
+        laravel: ['12.*', '13.*']
         stability: [prefer-stable]
         exclude:
-          # Laravel 11 supports PHP 8.2 - 8.4.
-          - laravel: '11.*'
-            php: '8.5'
-          - laravel: '11.*'
-            php: '8.6'
           # Laravel 13 requires PHP 8.3 or newer.
           - laravel: '13.*'
             php: '8.2'
         include:
-          - laravel: '11.*'
-            testbench: '9.*'
           - laravel: '12.*'
             testbench: '10.*'
           - laravel: '13.*'
             testbench: '11.*'
           # The lowest versions that composer.json allows.
-          - php: '8.2'
-            laravel: '11.*'
-            testbench: '9.*'
-            stability: prefer-lowest
           - php: '8.2'
             laravel: '12.*'
             testbench: '10.*'
@@ -72,7 +61,7 @@ jobs:
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
       - name: Show the installed versions
-        run: composer show laravel/framework orchestra/testbench phpunit/phpunit | grep -E '^(name|versions)'
+        run: composer show | grep -E '^(laravel/framework|orchestra/testbench|phpunit/phpunit) '
 
       - name: Run the PHP tests
         run: vendor/bin/phpunit

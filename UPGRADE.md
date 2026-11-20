@@ -4,7 +4,7 @@
 
 ### 1. Check the requirements
 
-Version 4 needs PHP 8.2 or newer and Laravel 11, 12 or 13. For Laravel 9 and 10, continue to use version 3.
+Version 4 needs PHP 8.2 or newer and Laravel 12 or 13. For Laravel 9, 10 and 11, continue to use version 3.
 
 ```bash
 composer require tohidplus/laravel-vue-translation:^4.0

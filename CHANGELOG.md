@@ -8,7 +8,7 @@ Read [UPGRADE.md](UPGRADE.md) before you upgrade.
 
 ### Added
 
-- Support for Laravel 11, 12 and 13, and for PHP 8.2 to 8.6.
+- Support for Laravel 12 and 13, and for PHP 8.2 to 8.6.
 - A Vue plugin for Vue 3 (`app.use(VueTranslation)`) and Vue 2 (`Vue.use(VueTranslation)`), with a `name` option for other global names such as `__` ([#2](https://github.com/tohidplus/laravel-vue-translation/issues/2)).
 - A named `translate` export for the Composition API and `<script setup>`.
 - `createTranslator()` in the new `translator.js` file, to use your own locale source.
@@ -38,7 +38,7 @@ Read [UPGRADE.md](UPGRADE.md) before you upgrade.
 
 ### Removed
 
-- Support for PHP 8.0 and 8.1, and for Laravel 9 and 10. Use version 3 for these versions.
+- Support for PHP 8.0 and 8.1, and for Laravel 9, 10 and 11. Use version 3 for these versions. Composer blocks all Laravel 11 releases because of unfixed security advisories.
 - The `elementaryframework/fire-fs` dependency, the `watcher` container binding, and the `CLIPrinter` and `FileWatcher\Listener` classes.
 
 ## Older versions

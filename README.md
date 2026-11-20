@@ -35,7 +35,6 @@ Version 4 supports these versions. The tests run on each combination.
 | --- | --- |
 | 13 | 8.3 – 8.6 |
 | 12 | 8.2 – 8.6 |
-| 11 | 8.2 – 8.4 |
 
 For older Laravel versions, use version 3 of the package.
 
@@ -55,7 +54,7 @@ The JavaScript helper works with Vite (the Laravel default), Laravel Mix and web
     php artisan vendor:publish --tag=vue-translation
     ```
 
-3. Make sure that your application has a `lang` directory. New Laravel 11+ applications do not have one. Create it with this command:
+3. Make sure that your application has a `lang` directory. New Laravel applications do not have one. Create it with this command:
 
     ```bash
     php artisan lang:publish
@@ -284,7 +283,7 @@ Run watch mode next to the Vite development server:
 php artisan VueTranslation:generate --watch
 ```
 
-Laravel 11+ applications start the development servers with `composer run dev`. To start watch mode with them, add a command to the `dev` script in your `composer.json`:
+Laravel applications start the development servers with `composer run dev`. To start watch mode with them, add a command to the `dev` script in your `composer.json`:
 
 ```json
 "dev": [
