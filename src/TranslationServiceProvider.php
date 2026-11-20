@@ -2,35 +2,32 @@
 
 namespace Tohidplus\Translation;
 
-use ElementaryFramework\FireFS\FireFS;
-use ElementaryFramework\FireFS\Watcher\FileSystemWatcher;
 use Illuminate\Support\ServiceProvider;
 use Tohidplus\Translation\Console\Commands\Translation;
+use Tohidplus\Translation\Contract\TranslationFileHelper;
 
 class TranslationServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function register(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                Translation::class,
-            ]);
-        }
-        $this->publishes([
-            __DIR__.'/resources/js/VueTranslation' => resource_path('js/VueTranslation'),
-        ]);
+        $this->app->bindIf(TranslationFileHelper::class, LaravelTranslationFileHelper::class);
+
+        $this->app->singleton(LaravelVueTranslation::class);
+        $this->app->alias(LaravelVueTranslation::class, 'VueTranslation');
     }
 
-    public function register()
+    public function boot(): void
     {
-        $this->app->singleton('VueTranslation', function () {
-            return new LaravelVueTranslation(new LaravelTranslationFileHelper());
-        });
-        $this->app->bind('watcher', function () {
-            $fireFS = new FireFS();
-            $watcher = new FileSystemWatcher($fireFS);
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
 
-            return $watcher;
-        });
+        $this->commands([
+            Translation::class,
+        ]);
+
+        $this->publishes([
+            __DIR__.'/resources/js/VueTranslation' => resource_path('js/VueTranslation'),
+        ], 'vue-translation');
     }
 }

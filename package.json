@@ -1,0 +1,12 @@
+{
+    "name": "laravel-vue-translation-tests",
+    "private": true,
+    "description": "Tests for the JavaScript files of tohidplus/laravel-vue-translation. This file is not part of the Composer package.",
+    "type": "module",
+    "scripts": {
+        "test": "node --test tests/js/"
+    },
+    "devDependencies": {
+        "esbuild": "^0.28.2"
+    }
+}

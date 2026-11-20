@@ -1,52 +1,39 @@
-const translations = require("./translations");
-export default {
-    translate(key, replacements = {}, allowKeyDotSplitting = true) {
-        let lang = document.documentElement.lang;
-        let word = translations[lang];
-        let fallback_locale =
-            document.querySelector('meta[name="fallback_locale"]') || null;
+/**
+ * Laravel translations for Vue.js and any other JavaScript application.
+ *
+ * Generate translations.json with: php artisan VueTranslation:generate
+ * Documentation: https://github.com/tohidplus/laravel-vue-translation
+ */
+import translations from './translations.json';
+import { createTranslator, createVuePlugin } from './translator.js';
 
-        const getAltValue = function(object, keys) {
-            if (allowKeyDotSplitting === true) {
-                // Avoid spliting on .dot for normal sentence case
-                keys = keys.split(".");
-            }
+/**
+ * The current locale comes from the lang attribute of the <html> tag.
+ */
+function currentLocale() {
+    return typeof document !== 'undefined' ? document.documentElement.lang : undefined;
+}
 
-            return keys.reduce((o, k) => (o || {})[k], object);
-        };
-
-        let keys;
-        if (allowKeyDotSplitting === true) {
-            keys = key.split(".");
-        } else {
-            // Avoid spliting on .dot for normal sentence case
-            keys = [key];
-        }
-
-        for (let i in keys) {
-            try {
-                word = word[keys[i]];
-                if (word === undefined) {
-                    if (fallback_locale.content) {
-                        word =
-                            getAltValue(
-                                translations[fallback_locale.content],
-                                key
-                            ) || key;
-                    } else {
-                        word = key;
-                    }
-                    break;
-                }
-            } catch (e) {
-                word = key;
-                break;
-            }
-        }
-
-        for (let i in replacements) {
-            word = word.replace(`:${i}`, replacements[i]);
-        }
-        return word;
+/**
+ * The fallback locale comes from <meta name="fallback_locale" content="en">.
+ */
+function fallbackLocale() {
+    if (typeof document === 'undefined') {
+        return undefined;
     }
-};
+
+    const meta = document.querySelector('meta[name="fallback_locale"]');
+
+    return meta ? meta.getAttribute('content') : undefined;
+}
+
+export const translate = createTranslator(translations, {
+    locale: currentLocale,
+    fallbackLocale,
+});
+
+export const { install } = createVuePlugin(translate);
+
+export { createTranslator, createVuePlugin, translations };
+
+export default { translate, install };

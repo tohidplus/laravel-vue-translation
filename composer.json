@@ -1,28 +1,64 @@
 {
     "name": "tohidplus/laravel-vue-translation",
-    "description": "A package to have Laravel translation feature in VueJs",
+    "description": "Use your Laravel translation files in Vue.js and any other JavaScript application",
+    "keywords": [
+        "laravel",
+        "vue",
+        "vuejs",
+        "vite",
+        "translation",
+        "localization",
+        "i18n"
+    ],
     "type": "library",
     "license": "MIT",
+    "homepage": "https://github.com/tohidplus/laravel-vue-translation",
     "authors": [
         {
             "name": "Tohid",
             "email": "tohid.dadashnejad@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "support": {
+        "issues": "https://github.com/tohidplus/laravel-vue-translation/issues",
+        "source": "https://github.com/tohidplus/laravel-vue-translation"
+    },
     "require": {
-        "elementaryframework/fire-fs": "1.2.2"
+        "php": "^8.2",
+        "illuminate/console": "^11.0|^12.0|^13.0",
+        "illuminate/filesystem": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^10.5|^11.0|^12.0|^13.0"
     },
     "autoload": {
         "psr-4": {
             "Tohidplus\\Translation\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tohidplus\\Translation\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
     "extra": {
         "laravel": {
             "providers": [
                 "Tohidplus\\Translation\\TranslationServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "VueTranslation": "Tohidplus\\Translation\\Facades\\VueTranslation"
+            }
         }
-    }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
